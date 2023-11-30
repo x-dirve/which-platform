@@ -1,6 +1,6 @@
 {
     "name": "@x-drive/which-platform",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "客户端平台类型检测",
     "repository": {
         "type": "git",

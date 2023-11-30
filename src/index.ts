@@ -1,8 +1,10 @@
 import { isBoolean } from "@x-drive/utils";
 
+type PlatType = "mobile" | "desktop" | "unknonw";
+
 interface IPlat {
     /**平台类型，mobile 或 desktop */
-    is: string;
+    is: PlatType;
 
     /**是否是微信 */
     wechat?: boolean;
@@ -24,6 +26,9 @@ interface IPlat {
 
     /**操作系统信息 */
     os?: string;
+
+    /**设备 */
+    device?: "pc" | "cellphone" | "pad";
 }
 export type { IPlat };
 
@@ -34,7 +39,7 @@ const REGEXP = {
     // Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X) AppleWebKit/602.4.6 (KHTML, like Gecko) Mobile/14D27 Weibo (iPhone8,1__weibo__7.6.0__iphone__os10.2.1)
     , "weibo": /(__weibo__|weibo\/)([\d\.]+)/i
     , "android": /Android[\s]?([\d+\.]+)/i
-    , "ios": /iPad|iPhone/i
+    , "ios": /(iPad|iPhone)/i
 }
 
 const COMMON_OS_REGEXP = /\([^\)]*\)/;
@@ -77,7 +82,7 @@ function which(uaStr: any): IPlat {
     }
 
     const plat: IPlat = {
-        "is": ""
+        "is": "unknonw"
     };
 
     for (var n in REGEXP) {
@@ -86,8 +91,11 @@ function which(uaStr: any): IPlat {
             switch (true) {
                 case n === "ios":
                     plat.is = "mobile";
+                    let device = plat[n][0].replace("i", "").toLowerCase();
+                    device = device === "phone" ? "cellphone" : "pad";
                     const iosVer = ua.match(/Version\/([\d+\.]+)/i);
                     plat[n] = iosVer ? iosVer[1] || "Unknonw" : "Unknonw";
+                    plat.device = device;
                     break;
 
                 case n === "android":
@@ -99,14 +107,16 @@ function which(uaStr: any): IPlat {
 
                 default:
                     plat[n] = plat[n][1];
-                    plat.is = n;
+                    if (!plat.is) {
+                        plat.is = n as PlatType;
+                    }
             }
         } else {
             plat[n] = false;
         }
     }
 
-    if (plat.is === "") {
+    if (plat.is === "unknonw") {
         let deviceArr = ua.match(COMMON_OS_REGEXP);
         let device = deviceArr && deviceArr[0];
         deviceArr = null;
@@ -121,7 +131,7 @@ function which(uaStr: any): IPlat {
             switch (true) {
                 case device.indexOf("Win") !== -1:
                     plat.os = "Windows";
-                    var winOs = "";
+                    let winOs = "";
                     while (osInfo.length) {
                         winOs = osInfo.shift();
                         if (winOs.indexOf("Win") !== -1) {

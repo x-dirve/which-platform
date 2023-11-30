@@ -8,7 +8,7 @@
 import whichPlat from "@x-drive/which-platform";
 
 // 自动尝试从当前 window 中获取平台信息
-const autoGetPlatInfo = whichPlat();
+const autoGetPlatInfo = whichPlat(true);
 
 // 根据传入的字符串获取
 // 如页面中直接读取 userAgent 或 nodeJS 请求中获取 request headers 中的 user-agent
